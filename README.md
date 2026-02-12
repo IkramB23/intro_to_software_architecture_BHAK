@@ -1,8 +1,6 @@
-# Spring Boot - Introduction to Software Architecture
+Introduction to Software Architecture Project
 
 ## Description
-
-Projet Spring Boot pour le cours **Introduction to Software Architecture**.
 
 Application REST API avec :
 - **Système d'authentification** (JWT)
