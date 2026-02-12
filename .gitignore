@@ -1,0 +1,29 @@
+# fichiers generes
+target/
+*.class
+*.jar
+*.war
+
+# ide
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# logs
+*.log
+logs/
+
+# os
+.DS_Store
+Thumbs.db
+
+# dossiers qui ne font pas partie du code source
+Software_Architecture_G6-main/
+cours 1 intro_software/
+cours 2 intro_software/
+cours jpa 2/
+JPA.pdf
+
+# profil de test local
+application-test.properties
