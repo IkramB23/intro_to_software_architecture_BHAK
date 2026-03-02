@@ -3,10 +3,10 @@ Introduction to Software Architecture Project
 ## Description
 
 Application REST API avec :
-- **Système d'authentification** (JWT)
+- **Systeme d'authentification** (JWT)
 - **API CRUD pour la gestion des utilisateurs**
-- **Gestion des rôles** (ADMIN / USER)
-- **Documentation Swagger/OpenAPI**
+- **Gestion des roles** (ADMIN / USER)
+- **Tests via Postman**
 
 ## Fonctionnalités
 
@@ -44,6 +44,7 @@ User (*) ←→ (1) Role            [ManyToOne]
 - **PostgreSQL**
 - **Lombok**
 - **Swagger/OpenAPI 3**
+- **Postman** (tests API)
 
 ## Structure du Projet
 ```
@@ -85,6 +86,7 @@ src/main/java/com/bhak/project/
 1. Java 17+
 2. Maven
 3. PostgreSQL
+4. Postman
 
 ## Installation
 
@@ -128,7 +130,24 @@ Accédez à la documentation interactive :
 ```
 http://localhost:8080/swagger-ui.html
 ```
+## Tester avec Postman
 
+Une collection Postman est fournie dans le dossier `postman/`.
+
+### Importer la collection
+1. Ouvrir Postman
+2. Cliquer sur **Import**
+3. Selectionner le fichier `postman/Software_Architecture_BHAK.postman_collection.json`
+
+### Workflow de test
+1. **Register ADMIN** : creer un compte admin
+2. **Login ADMIN** : se connecter (le token JWT est sauvegarde automatiquement)
+3. **CRUD Users** : toutes les requetes admin utilisent le token automatiquement
+
+La collection contient :
+- **Auth** : Register ADMIN, Register USER, Login ADMIN, Login USER
+- **Users CRUD** : GET all (pagine), GET by ID, POST, PUT, DELETE
+- **Tests securite** : acces sans token (403), endpoint public
 ## Exemples d'utilisation
 
 ### 1. Inscription
