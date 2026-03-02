@@ -238,12 +238,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"user_modifie\",\n    \"email\": \"modifie@bhak.com\"\n}"
+							"raw": "{\n    \"username\": \"user_modifie\",\n    \"email\": \"modifie@bhak.com\",\n    \"phoneNumber\": \"+33600000099\",\n    \"password\": \"pass123\",\n    \"roleType\": \"USER\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/admin/users/1",
+							"raw": "{{base_url}}/api/admin/users/2",
 							"host": ["{{base_url}}"],
-							"path": ["api", "admin", "users", "1"]
+							"path": ["api", "admin", "users", "2"]
 						}
 					}
 				},
