@@ -42,6 +42,7 @@ User (*) ←→ (1) Role            [ManyToOne]
 - **Spring Security** (JWT)
 - **Spring Data JPA**
 - **PostgreSQL**
+- **Docker** (conteneurisation)
 - **Lombok**
 - **Swagger/OpenAPI 3**
 - **Postman** (tests API)
@@ -84,28 +85,39 @@ src/main/java/com/bhak/project/
 
 ## Prérequis
 1. Java 17+
-2. Maven
-3. PostgreSQL
+2. Maven (ou utiliser le wrapper `mvnw` inclus)
+3. Docker et Docker Compose
 4. Postman
 
-## Installation
+## Installation et Lancement
 
-### 1. Créer la base de données
+### Option 1 : avec Docker (recommande)
+Une seule commande, rien d'autre a installer :
+```bash
+docker-compose up --build
+```
+Cela lance automatiquement :
+- PostgreSQL (port 5432)
+- L'application Spring Boot (port 8080)
+
+Pour arreter :
+```bash
+docker-compose down
+```
+
+### Option 2 : sans Docker (developpement local)
+1. Installer PostgreSQL et creer la base :
 ```sql
 CREATE DATABASE software_architecture_db;
 ```
-
-### 2. Configurer la connexion
-Modifier `src/main/resources/application.properties` :
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/software_architecture_db
-spring.datasource.username=votre_username
-spring.datasource.password=votre_password
+2. Lancer l'application :
+```bash
+./mvnw spring-boot:run
 ```
 
-### 3. Lancer l'application
+### Option 3 : avec H2 en memoire (tests rapides)
 ```bash
-mvn spring-boot:run
+./mvnw spring-boot:run -Dspring-boot.run.arguments=--spring.profiles.active=test
 ```
 
 ## Endpoints API
