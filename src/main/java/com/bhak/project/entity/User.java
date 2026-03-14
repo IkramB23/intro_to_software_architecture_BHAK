@@ -29,6 +29,10 @@ public class User {
     @JoinColumn(name = "permission_id", nullable = false)
     private Role role;
 
+    // indique si le compte a ete verifie par e-mail
+    @Column(name = "verified", nullable = false)
+    private boolean verified = false;
+
     // credentials lies au compte (cascade = si on supprime le user, on supprime ses credentials)
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Credentials credentials;

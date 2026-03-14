@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # base de donnees postgresql
   postgres:
@@ -19,7 +17,31 @@ services:
       timeout: 5s
       retries: 10
 
-  # application spring boot
+  # broker de messages rabbitmq
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: bhak_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # serveur smtp local pour tester les e-mails
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: bhak_mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  # application spring boot (auth)
   app:
     build: .
     container_name: bhak_app
@@ -29,8 +51,32 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/software_architecture_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # microservice notification (consomme les evenements et envoie les e-mails)
+  notification:
+    build: ../notification-service
+    container_name: bhak_notification
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: 1025
+      APP_AUTH_BASE_URL: http://app:8080
+    depends_on:
+      rabbitmq:
         condition: service_healthy
 
 volumes:

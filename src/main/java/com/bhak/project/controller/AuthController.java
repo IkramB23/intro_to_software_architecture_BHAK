@@ -12,6 +12,7 @@ import com.bhak.project.exception.InvalidRequestException;
 import com.bhak.project.repository.CredentialsRepository;
 import com.bhak.project.repository.RoleRepository;
 import com.bhak.project.repository.UserRepository;
+import com.bhak.project.service.VerificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -25,10 +26,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -47,6 +45,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
+    private final VerificationService verificationService;
 
     // ---- inscription ----
 
@@ -100,7 +99,24 @@ public class AuthController {
         User saved = userRepository.save(user);
         log.info("Compte [{}] inscrit avec le rôle {}", saved.getUsername(), type);
 
+        // generer le token de verification et publier l'evenement rabbitmq
+        verificationService.createTokenAndPublishEvent(saved);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    // ---- verification d'e-mail ----
+
+    @GetMapping("/verify")
+    @Operation(summary = "Vérification d'e-mail via le lien reçu")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Compte vérifié"),
+        @ApiResponse(responseCode = "400", description = "Token invalide ou expiré")
+    })
+    public ResponseEntity<?> verify(@RequestParam String tokenId, @RequestParam String t) {
+        log.info("Vérification demandée [tokenId={}]", tokenId);
+        verificationService.verify(tokenId, t);
+        return ResponseEntity.ok(Map.of("message", "Compte vérifié avec succès"));
     }
 
     // ---- connexion ----

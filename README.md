@@ -6,13 +6,22 @@ Application REST API avec :
 - **Systeme d'authentification** (JWT)
 - **API CRUD pour la gestion des utilisateurs**
 - **Gestion des roles** (ADMIN / USER)
+- **Vérification d'e-mail** via RabbitMQ + MailHog
 - **Tests via Postman**
 
 ## Fonctionnalités
 
 ### Authentification
-- **Register** : Inscription d'un nouvel utilisateur
+- **Register** : Inscription d'un nouvel utilisateur (verified=false)
 - **Login** : Connexion et génération de token JWT
+- **Verify** : Vérification d'e-mail via lien (token BCrypt, one-shot)
+
+### Vérification d'e-mail (RabbitMQ)
+- Auth publie `UserRegistered` sur RabbitMQ à l'inscription
+- Notification consomme l'événement et envoie un e-mail via MailHog
+- L'utilisateur clique sur le lien → `GET /api/auth/verify` → verified=true
+- Auth publie `EmailVerified` après vérification réussie
+- Consumer Analytics compte les vérifications
 
 ### Gestion des Utilisateurs (ADMIN uniquement)
 - **GET** `/api/admin/users` : Liste tous les utilisateurs (pagination)
@@ -41,7 +50,11 @@ User (*) ←→ (1) Role            [ManyToOne]
 - **Spring Boot 3.2**
 - **Spring Security** (JWT)
 - **Spring Data JPA**
+- **Spring AMQP** (RabbitMQ)
+- **Spring Mail** (MailHog)
 - **PostgreSQL**
+- **RabbitMQ 3.13** (messagerie asynchrone)
+- **MailHog** (SMTP de test)
 - **Docker** (conteneurisation)
 - **Lombok**
 - **Swagger/OpenAPI 3**
@@ -60,13 +73,16 @@ src/main/java/com/bhak/project/
 │   ├── HomeController.java
 │   └── UserController.java
 ├── dto/                    # Data Transfer Objects
+│   ├── EmailVerifiedEvent.java
 │   ├── LoginRequest.java
-│   └── RegisterRequest.java
+│   ├── RegisterRequest.java
+│   └── UserRegisteredEvent.java
 ├── entity/                 # Entités JPA
 │   ├── Credentials.java
 │   ├── Role.java
 │   ├── RoleType.java
-│   └── User.java
+│   ├── User.java
+│   └── VerificationToken.java
 ├── exception/              # Exceptions métier
 │   ├── DuplicateResourceException.java
 │   ├── GlobalExceptionHandler.java
@@ -77,10 +93,13 @@ src/main/java/com/bhak/project/
 ├── repository/             # Repositories JPA
 │   ├── CredentialsRepository.java
 │   ├── RoleRepository.java
-│   └── UserRepository.java
+│   ├── UserRepository.java
+│   └── VerificationTokenRepository.java
 └── service/                # Services métier
     ├── CustomUserDetailsService.java
-    └── UserService.java
+    ├── EventPublisher.java
+    ├── UserService.java
+    └── VerificationService.java
 ```
 
 ## Prérequis
@@ -98,6 +117,8 @@ docker-compose up --build
 ```
 Cela lance automatiquement :
 - PostgreSQL (port 5432)
+- RabbitMQ (port 5672 / UI 15672)
+- MailHog (SMTP 1025 / UI 8025)
 - L'application Spring Boot (port 8080)
 
 Pour arreter :
@@ -110,9 +131,17 @@ docker-compose down
 ```sql
 CREATE DATABASE software_architecture_db;
 ```
-2. Lancer l'application :
+2. Démarrer l'infrastructure :
+```bash
+docker compose up -d postgres rabbitmq mailhog
+```
+3. Lancer le service Auth :
 ```bash
 ./mvnw spring-boot:run
+```
+4. Lancer le service Notification (dans un autre terminal) :
+```bash
+cd ../notification-service && mvn spring-boot:run
 ```
 
 ### Option 3 : avec H2 en memoire (tests rapides)
@@ -127,6 +156,7 @@ CREATE DATABASE software_architecture_db;
 |---------|----------|-------------|
 | POST | `/api/auth/register` | Inscription d'un nouvel utilisateur |
 | POST | `/api/auth/login` | Connexion (retourne un token JWT) |
+| GET | `/api/auth/verify?tokenId=...&t=...` | Vérification d'e-mail via lien |
 
 ### Gestion des Utilisateurs (ADMIN uniquement)
 | Méthode | Endpoint | Description |
@@ -221,8 +251,16 @@ curl -X POST http://localhost:8080/api/admin/users \
 
 ### Sécurité
 - **JWT** : Tokens stateless pour l'authentification
-- **BCrypt** : Hachage sécurisé des mots de passe
+- **BCrypt** : Hachage sécurisé des mots de passe et des tokens de vérification
 - **@PreAuthorize** : Contrôle d'accès basé sur les rôles
+
+### Messagerie asynchrone (TP Vérification d'e-mail)
+- **RabbitMQ** : Exchange topic `auth.events`, queues durables, DLX/DLQ
+- **Événements** : `UserRegistered` (inscription) et `EmailVerified` (vérification)
+- **Découplage** : Auth ne connaît pas Notification, communication via événements
+- **Résilience** : DLQ pour les messages en erreur, retries automatiques
+- **MailHog** : Serveur SMTP local pour tester les e-mails sans envoi réel
+- Voir [messagerie.md](messagerie.md) pour la documentation complète
 
 ## Auteur
 BHAK - Introduction to Software Architecture
