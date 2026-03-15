@@ -1,5 +1,8 @@
-Introduction to Software Architecture Project
+                                     Introduction to Software Architecture Project
 
+##Team Members : - Haddoun Aya 
+                 - Benchalal Ikram
+                 - Abu Orm Daniel 
 ## Description
 
 Application REST API avec :
