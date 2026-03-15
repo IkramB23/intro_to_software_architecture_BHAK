@@ -141,7 +141,7 @@ docker compose up -d postgres rabbitmq mailhog
 ```
 4. Lancer le service Notification (dans un autre terminal) :
 ```bash
-cd ../notification-service && mvn spring-boot:run
+cd notification-service && mvn spring-boot:run
 ```
 
 ### Option 3 : avec H2 en memoire (tests rapides)
