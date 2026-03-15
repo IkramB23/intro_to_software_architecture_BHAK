@@ -63,7 +63,7 @@ services:
 
   # microservice notification (consomme les evenements et envoie les e-mails)
   notification:
-    build: ../notification-service
+    build: ./notification-service
     container_name: bhak_notification
     ports:
       - "8081:8081"
