@@ -12,8 +12,31 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-// charge les infos d'un utilisateur pour spring security
-// transforme notre entite User en UserDetails
+/**
+ * Implementation of {@link org.springframework.security.core.userdetails.UserDetailsService}
+ * for Spring Security authentication.
+ *
+ * <h2>Purpose</h2>
+ * Bridges the application's data model ({@link com.bhak.project.entity.User})
+ * and the contract expected by Spring Security ({@link org.springframework.security.core.userdetails.UserDetails}).
+ * It is used by the {@code DaoAuthenticationProvider} declared in
+ * {@link com.bhak.project.configuration.SecurityConfig} to load a user during
+ * credential verification (login) or JWT validation.
+ *
+ * <h2>How it works</h2>
+ * <ol>
+ *   <li>Looks up the account by username via {@code UserRepository#findByUsername()}.</li>
+ *   <li>Checks that the account exists and has {@link com.bhak.project.entity.Credentials}.</li>
+ *   <li>Builds a Spring Security {@code User} object with the username, hashed password,
+ *       and an authority {@code ROLE_<ROLE_NAME>} (e.g. {@code ROLE_ADMIN}).
+ *       This {@code ROLE_} prefix is required by Spring Security for
+ *       {@code hasRole("ADMIN")} to work correctly.</li>
+ * </ol>
+ *
+ * <h2>Technologies</h2>
+ * Spring Security ({@code UserDetailsService}, {@code SimpleGrantedAuthority}),
+ * Lombok ({@code @RequiredArgsConstructor}, {@code @Slf4j}).
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j

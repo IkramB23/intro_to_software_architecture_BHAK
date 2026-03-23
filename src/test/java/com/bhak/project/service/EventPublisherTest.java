@@ -21,6 +21,34 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the {@link EventPublisher} service (RabbitMQ publishing).
+ *
+ * <h2>Purpose</h2>
+ * Verifies that business events ({@code UserRegistered}, {@code EmailVerified})
+ * are correctly sent via the {@code RabbitTemplate} with the right exchange,
+ * routing key, and custom headers ({@code x-correlation-id},
+ * {@code x-schema-version}).
+ *
+ * <h2>Approach</h2>
+ * <ul>
+ *   <li>The {@code RabbitTemplate} is mocked → no RabbitMQ broker is needed.</li>
+ *   <li>Properties injected via {@code @Value} are set using
+ *       {@code ReflectionTestUtils} to bypass the absence of a Spring context.</li>
+ *   <li>An {@code ArgumentCaptor<MessagePostProcessor>} captures the post-processor
+ *       to verify the headers added to the message.</li>
+ * </ul>
+ *
+ * <h2>Tested scenarios</h2>
+ * <ul>
+ *   <li>publishUserRegistered sends to the correct exchange and routing key.</li>
+ *   <li>publishUserRegistered adds {@code x-correlation-id} and {@code x-schema-version} headers.</li>
+ *   <li>publishEmailVerified sends to the correct exchange and routing key.</li>
+ * </ul>
+ *
+ * <h2>Technologies</h2>
+ * JUnit 5, Mockito, Spring {@code ReflectionTestUtils}, AssertJ.
+ */
 @ExtendWith(MockitoExtension.class)
 class EventPublisherTest {
 

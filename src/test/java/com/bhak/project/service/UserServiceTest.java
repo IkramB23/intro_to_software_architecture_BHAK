@@ -26,6 +26,35 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the {@link UserService} service (pure business logic).
+ *
+ * <h2>Purpose</h2>
+ * Verifies each CRUD operation (findAll, findById, create, update, delete)
+ * as well as business rules: username/email/phone uniqueness, role resolution,
+ * password hashing, and error handling (404, 409, 400).
+ *
+ * <h2>Approach</h2>
+ * <ul>
+ *   <li>{@code @ExtendWith(MockitoExtension.class)} – pure unit tests,
+ *       no Spring context, no database.</li>
+ *   <li>Repositories ({@code UserRepository}, {@code RoleRepository},
+ *       {@code CredentialsRepository}) and {@code PasswordEncoder} are mocked
+ *       with {@code @Mock} and injected via {@code @InjectMocks}.</li>
+ *   <li>Assertions use AssertJ ({@code assertThat}, {@code assertThatThrownBy}).</li>
+ * </ul>
+ *
+ * <h2>Tested scenarios</h2>
+ * <ul>
+ *   <li>findAll returns a page, findById returns the correct user or throws 404.</li>
+ *   <li>create success, create with duplicate username/email/phone (409), unknown role (400).</li>
+ *   <li>partial update success, update with duplicate username (409), update non-existent user (404).</li>
+ *   <li>delete success and delete non-existent user (404).</li>
+ * </ul>
+ *
+ * <h2>Technologies</h2>
+ * JUnit 5, Mockito, AssertJ.
+ */
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 

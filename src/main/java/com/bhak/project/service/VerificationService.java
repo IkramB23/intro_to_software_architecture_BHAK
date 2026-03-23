@@ -19,7 +19,37 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-// gere la generation des tokens de verification et la validation
+/**
+ * Email address verification service using a single-use token (one-shot).
+ *
+ * <h2>Purpose</h2>
+ * Manages the complete email verification cycle:
+ * <ol>
+ *   <li>Generating a unique token and publishing a {@code UserRegistered} event
+ *       to RabbitMQ via {@link EventPublisher}.</li>
+ *   <li>Validating the link received by email, marking the account as verified, and publishing
+ *       an {@code EmailVerified} event.</li>
+ * </ol>
+ *
+ * <h2>Detailed behaviour</h2>
+ * <ul>
+ *   <li><b>Generation</b> ({@code createTokenAndPublishEvent}): creates a {@code tokenId}
+ *       (short identifier) and a cleartext token (UUID). The cleartext token is hashed with BCrypt
+ *       before being persisted in {@code tbl_verification_tokens}. The cleartext token (unhashed)
+ *       is included in the RabbitMQ event so the notification-service can build
+ *       the verification link sent by email.</li>
+ *   <li><b>Validation</b> ({@code verify}): compares the received cleartext token with the stored
+ *       hash ({@code passwordEncoder.matches()}), checks expiration ({@code expiresAt}),
+ *       then marks the {@code User} as verified. The token is then deleted (one-shot).
+ *       The process is <em>idempotent</em>: a second call with a valid token
+ *       on an already-verified account has no side effects.</li>
+ * </ul>
+ *
+ * <h2>Technologies</h2>
+ * Spring Data JPA, Spring Security ({@code PasswordEncoder} for BCrypt hashing),
+ * Spring AMQP (via {@code EventPublisher}), {@code @Transactional},
+ * Lombok ({@code @RequiredArgsConstructor}, {@code @Slf4j}).
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j

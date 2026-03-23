@@ -10,7 +10,23 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-// endpoint racine, retourne les infos de l'api
+/**
+ * API health-check controller.
+ *
+ * <h2>Purpose</h2>
+ * Exposes a single endpoint {@code GET /} accessible without authentication.
+ * It returns a JSON object containing the application name, version,
+ * status ({@code UP}), a timestamp, and the list of main routes.
+ *
+ * <h2>How it works</h2>
+ * No database calls or external dependencies: the endpoint responds
+ * immediately with static information, allowing quick verification
+ * that the service is running and reachable (useful for Docker
+ * or a load-balancer).
+ *
+ * <h2>Technologies</h2>
+ * {@code @RestController}, Swagger/OpenAPI ({@code @Tag}, {@code @Operation}).
+ */
 @RestController
 @Tag(name = "Santé", description = "Vérification de l'état de l'API")
 public class HomeController {

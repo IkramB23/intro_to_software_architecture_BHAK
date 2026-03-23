@@ -31,7 +31,39 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-// endpoints publics : inscription et connexion
+/**
+ * REST controller handling public authentication endpoints.
+ *
+ * <h2>Purpose</h2>
+ * Exposes three unprotected routes (no JWT required):
+ * <ul>
+ *   <li>{@code POST /api/auth/register} – register a new user account.</li>
+ *   <li>{@code GET  /api/auth/verify}    – verify the email address via a tokenised link.</li>
+ *   <li>{@code POST /api/auth/login}     – log in and receive a JWT token.</li>
+ * </ul>
+ *
+ * <h2>How it works</h2>
+ * <ol>
+ *   <li><b>Registration</b>: validates required fields, checks uniqueness of username / email / phone,
+ *       creates the {@code User + Credentials} aggregate with a BCrypt-hashed password via
+ *       {@link org.springframework.security.crypto.password.PasswordEncoder},
+ *       then delegates to {@link com.bhak.project.service.VerificationService} for token generation
+ *       and publishing the {@code UserRegistered} event to RabbitMQ.</li>
+ *   <li><b>Verification</b>: delegates token validation to {@code VerificationService#verify()} which
+ *       compares the BCrypt hash, marks the account as verified, and publishes the {@code EmailVerified} event.</li>
+ *   <li><b>Login</b>: uses the Spring Security {@link org.springframework.security.authentication.AuthenticationManager}
+ *       to validate credentials, then generates a JWT via {@link com.bhak.project.configuration.JwtUtils}.</li>
+ * </ol>
+ *
+ * <h2>Technologies / Annotations</h2>
+ * {@code @RestController}, {@code @RequestMapping}, Swagger/OpenAPI ({@code @Tag}, {@code @Operation}, {@code @ApiResponse}),
+ * Lombok ({@code @RequiredArgsConstructor}, {@code @Slf4j}).
+ *
+ * <h2>Error handling</h2>
+ * Custom exceptions ({@code InvalidRequestException}, {@code DuplicateResourceException})
+ * are intercepted by {@link com.bhak.project.exception.GlobalExceptionHandler} which returns
+ * a standardised JSON response with the appropriate HTTP status code (400, 409, etc.).
+ */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor

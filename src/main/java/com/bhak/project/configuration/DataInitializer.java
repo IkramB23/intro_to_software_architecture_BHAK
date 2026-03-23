@@ -12,7 +12,30 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-// insere les roles et les comptes de demonstration au demarrage
+/**
+ * Data initialisation component that runs at application startup.
+ *
+ * <h2>Purpose</h2>
+ * Implements {@link org.springframework.boot.CommandLineRunner} to execute
+ * code after the Spring context has fully started. It inserts into the database:
+ * <ul>
+ *   <li>The <b>roles</b> defined in {@link com.bhak.project.entity.RoleType}
+ *       (ADMIN, MODERATOR, USER) if they do not yet exist.</li>
+ *   <li>A <b>demo admin account</b> ({@code admin / admin123}).</li>
+ *   <li>A <b>demo user account</b> ({@code user1 / user123}).</li>
+ * </ul>
+ *
+ * <h2>How it works</h2>
+ * The {@code run()} method is called once at startup.
+ * Existence checks ({@code existsByName}, {@code findByUsername})
+ * make the initialisation <em>idempotent</em>: restarting the application
+ * does not create duplicates.
+ *
+ * <h2>Technologies</h2>
+ * {@code @Component}, {@link org.springframework.boot.CommandLineRunner},
+ * {@link org.springframework.security.crypto.password.PasswordEncoder} (BCrypt),
+ * Lombok ({@code @RequiredArgsConstructor}, {@code @Slf4j}).
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j

@@ -17,8 +17,34 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-// controller pour le CRUD admin des utilisateurs
-// tous les endpoints necessitent le role ADMIN
+/**
+ * REST controller for user account administration (full CRUD).
+ *
+ * <h2>Purpose</h2>
+ * Exposes admin-only endpoints under {@code /api/admin/users}:
+ * <ul>
+ *   <li>{@code GET    /api/admin/users}      – paginated list of accounts (configurable sorting).</li>
+ *   <li>{@code GET    /api/admin/users/{id}}  – account details by identifier.</li>
+ *   <li>{@code POST   /api/admin/users}      – create an account (with a chosen role).</li>
+ *   <li>{@code PUT    /api/admin/users/{id}}  – update an existing account.</li>
+ *   <li>{@code DELETE /api/admin/users/{id}}  – delete an account and its credentials (cascade).</li>
+ * </ul>
+ *
+ * <h2>How it works</h2>
+ * Each endpoint is protected by {@code @PreAuthorize("hasRole('ADMIN')")} (Spring Security
+ * Method Security). The controller delegates all business logic (uniqueness checks,
+ * password hashing, role management) to {@link com.bhak.project.service.UserService}.
+ * Pagination is handled natively by Spring Data via {@link org.springframework.data.domain.Pageable}.
+ *
+ * <h2>Technologies / Annotations</h2>
+ * {@code @RestController}, {@code @PreAuthorize}, Swagger/OpenAPI ({@code @Tag}, {@code @Operation}),
+ * Lombok ({@code @RequiredArgsConstructor}, {@code @Slf4j}), Spring Data Pagination.
+ *
+ * <h2>Error handling</h2>
+ * Exceptions {@code ResourceNotFoundException} (404), {@code DuplicateResourceException} (409)
+ * and {@code InvalidRequestException} (400) are handled globally by
+ * {@link com.bhak.project.exception.GlobalExceptionHandler}.
+ */
 @RestController
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor

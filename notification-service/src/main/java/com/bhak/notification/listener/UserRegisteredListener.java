@@ -7,8 +7,27 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-// consomme les evenements UserRegistered depuis la file rabbitmq
-// en cas d'exception, le message sera redirige vers la DLQ
+/**
+ * RabbitMQ consumer for {@code UserRegistered} events.
+ *
+ * <h2>Purpose</h2>
+ * Listens to the {@code notification.user-registered} queue and, for each received
+ * message, delegates sending the verification email to {@link com.bhak.notification.service.EmailService}.
+ *
+ * <h2>How it works</h2>
+ * <ol>
+ *   <li>The JSON message is automatically deserialized into a
+ *       {@link com.bhak.notification.dto.UserRegisteredEvent} thanks to the
+ *       {@code Jackson2JsonMessageConverter} configured in {@link com.bhak.notification.config.RabbitMQConfig}.</li>
+ *   <li>The listener calls {@code emailService.sendVerificationEmail(event)}.</li>
+ *   <li>If an exception is thrown during processing, RabbitMQ re-routes
+ *       the message to the Dead Letter Queue ({@code notification.user-registered.dlq})
+ *       to prevent message loss.</li>
+ * </ol>
+ *
+ * <h2>Technologies</h2>
+ * {@code @RabbitListener}, Spring AMQP, Lombok ({@code @RequiredArgsConstructor}, {@code @Slf4j}).
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j

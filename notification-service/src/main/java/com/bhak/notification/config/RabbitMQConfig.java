@@ -6,8 +6,30 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-// configuration rabbitmq cote notification
-// declare les memes files que le service auth pour que spring puisse les creer si besoin
+/**
+ * RabbitMQ configuration on the notification-service side (consumer).
+ *
+ * <h2>Purpose</h2>
+ * Declares the same exchange, queues, bindings, and DLQ topology as the
+ * main service, so that Spring AMQP can automatically create it
+ * if it does not yet exist in RabbitMQ at startup.
+ *
+ * <h2>Topology</h2>
+ * <ul>
+ *   <li><b>Exchange</b>: {@code auth.events} (topic).</li>
+ *   <li><b>Queue</b>: {@code notification.user-registered} (routing key {@code auth.user-registered})
+ *       with Dead Letter Exchange to {@code notification.user-registered.dlq}.</li>
+ *   <li><b>Analytics queue</b>: {@code analytics.email-verified} (routing key {@code auth.email-verified}).</li>
+ * </ul>
+ *
+ * <h2>Serialization</h2>
+ * The {@code Jackson2JsonMessageConverter} bean automatically deserializes
+ * JSON messages into Java objects (DTOs from the
+ * {@code com.bhak.notification.dto} package).
+ *
+ * <h2>Annotations</h2>
+ * {@code @Configuration}, {@code @Bean}.
+ */
 @Configuration
 public class RabbitMQConfig {
 
