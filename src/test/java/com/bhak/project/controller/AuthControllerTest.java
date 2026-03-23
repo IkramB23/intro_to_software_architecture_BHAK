@@ -32,6 +32,36 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Unit tests for the {@link AuthController} controller (web layer only).
+ *
+ * <h2>Purpose</h2>
+ * Verifies that the authentication endpoints ({@code /api/auth/register},
+ * {@code /api/auth/verify}, {@code /api/auth/login}) return the correct
+ * HTTP status codes and response bodies for each scenario (success, 400,
+ * 401, 409 errors).
+ *
+ * <h2>Approach</h2>
+ * <ul>
+ *   <li>{@code @WebMvcTest(AuthController.class)} – loads only the MVC context
+ *       (no database, no RabbitMQ), making the tests fast and isolated.</li>
+ *   <li>{@code @AutoConfigureMockMvc(addFilters = false)} – disables security filters
+ *       (including {@code JwtFilter}) to test controller logic independently
+ *       of authentication.</li>
+ *   <li>Controller dependencies ({@code UserRepository}, {@code JwtUtils},
+ *       {@code VerificationService}, etc.) are mocked with {@code @MockBean} (Mockito).</li>
+ * </ul>
+ *
+ * <h2>Tested scenarios</h2>
+ * <ul>
+ *   <li><b>Register</b>: success (201), missing fields (400), duplicate username (409).</li>
+ *   <li><b>Verify</b>: success (200), invalid token (400).</li>
+ *   <li><b>Login</b>: success with JWT (200), wrong credentials (401), missing fields (400).</li>
+ * </ul>
+ *
+ * <h2>Technologies</h2>
+ * JUnit 5, Spring MockMvc, Mockito ({@code @MockBean}), Jackson ({@code ObjectMapper}).
+ */
 @WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class AuthControllerTest {

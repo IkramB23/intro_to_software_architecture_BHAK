@@ -7,8 +7,27 @@ import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 
-// entite principale representant un compte utilisateur
-// separee des donnees sensibles (Credentials) et du role
+/**
+ * JPA entity representing a user account in the {@code tbl_users} table.
+ *
+ * <h2>Purpose</h2>
+ * Models the public information of an account: unique username, role,
+ * verification status (email), and creation date.
+ * Sensitive data (password, email, phone) is isolated in the
+ * {@link Credentials} entity, linked via a bidirectional {@code @OneToOne}
+ * relationship with full cascade ({@code CascadeType.ALL} + {@code orphanRemoval}).
+ *
+ * <h2>Relationships</h2>
+ * <ul>
+ *   <li>{@code @ManyToOne} to {@link Role} – a user has one role (ADMIN, MODERATOR, USER).</li>
+ *   <li>{@code @OneToOne(mappedBy="user")} to {@link Credentials} – authentication data.
+ *       Deleting the {@code User} automatically deletes its {@code Credentials}.</li>
+ * </ul>
+ *
+ * <h2>Annotations</h2>
+ * {@code @Entity}, {@code @Table}, {@code @PrePersist} (auto-populates {@code createdAt}),
+ * Lombok ({@code @Data}, {@code @NoArgsConstructor}, {@code @AllArgsConstructor}).
+ */
 @Entity
 @Table(name = "tbl_users")
 @Data

@@ -28,6 +28,31 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the {@link VerificationService} service (email verification).
+ *
+ * <h2>Purpose</h2>
+ * Verifies the complete verification cycle: token generation + event publishing,
+ * then token validation with all edge cases.
+ *
+ * <h2>Tested scenarios</h2>
+ * <ul>
+ *   <li><b>createTokenAndPublishEvent</b>: persists a {@code VerificationToken}
+ *       with the correct fields (tokenId, userId, hash, expiration) and publishes a
+ *       consistent {@code UserRegistered} event.</li>
+ *   <li><b>verify (success)</b>: valid token → the account is marked as verified,
+ *       the token is deleted (one-shot), an {@code EmailVerified} event is published.</li>
+ *   <li><b>verify (expired token)</b>: throws {@code InvalidRequestException} and deletes the token.</li>
+ *   <li><b>verify (wrong token)</b>: BCrypt does not match → {@code InvalidRequestException}.</li>
+ *   <li><b>verify (unknown tokenId)</b>: {@code InvalidRequestException}.</li>
+ *   <li><b>verify (idempotent)</b>: already verified account → no save, no event published.</li>
+ *   <li><b>verify (user not found)</b>: {@code ResourceNotFoundException}.</li>
+ * </ul>
+ *
+ * <h2>Technologies</h2>
+ * JUnit 5, Mockito ({@code @Mock}, {@code @InjectMocks}, {@code ArgumentCaptor}),
+ * Spring {@code ReflectionTestUtils}, AssertJ.
+ */
 @ExtendWith(MockitoExtension.class)
 class VerificationServiceTest {
 

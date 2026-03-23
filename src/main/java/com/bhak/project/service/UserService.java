@@ -18,8 +18,34 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// service qui gere la logique metier des utilisateurs
-// verifications d'unicite, creation, modification, suppression
+/**
+ * Business service managing the lifecycle of user accounts.
+ *
+ * <h2>Purpose</h2>
+ * Encapsulates all user-related business logic:
+ * <ul>
+ *   <li><b>Read</b>: paginated account listing ({@code findAll}) and individual
+ *       lookup ({@code findById}).</li>
+ *   <li><b>Create</b>: uniqueness checks (username, email, phone),
+ *       role resolution, BCrypt password hashing, then persistence
+ *       of the {@code User + Credentials} aggregate.</li>
+ *   <li><b>Update</b>: partial update (only non-null fields are modified)
+ *       with re-validation of uniqueness.</li>
+ *   <li><b>Delete</b>: removes the {@code User}; the associated {@code Credentials}
+ *       are automatically deleted thanks to {@code CascadeType.ALL}
+ *       and {@code orphanRemoval=true}.</li>
+ * </ul>
+ *
+ * <h2>How it works</h2>
+ * Each public method is annotated with {@code @Transactional} (or {@code @Transactional(readOnly=true)}
+ * for reads). Custom exceptions ({@code ResourceNotFoundException},
+ * {@code DuplicateResourceException}, {@code InvalidRequestException}) raised
+ * here are intercepted by {@link com.bhak.project.exception.GlobalExceptionHandler}.
+ *
+ * <h2>Technologies</h2>
+ * Spring Data JPA, Spring Security ({@code PasswordEncoder}), {@code @Transactional},
+ * Lombok ({@code @RequiredArgsConstructor}, {@code @Slf4j}).
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j

@@ -13,6 +13,25 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for the {@link CustomUserDetailsService} service.
+ *
+ * <h2>Purpose</h2>
+ * Verifies that the conversion from the {@code User} entity to a
+ * Spring Security {@code UserDetails} object is correct: username, password,
+ * authorities ({@code ROLE_USER}, {@code ROLE_ADMIN}), and error handling.
+ *
+ * <h2>Tested scenarios</h2>
+ * <ul>
+ *   <li>Existing user with USER role → returns the correct authorities.</li>
+ *   <li>Existing user with ADMIN role → {@code ROLE_ADMIN} authority.</li>
+ *   <li>Unknown user → throws {@code UsernameNotFoundException}.</li>
+ *   <li>User without credentials → throws {@code UsernameNotFoundException}.</li>
+ * </ul>
+ *
+ * <h2>Technologies</h2>
+ * JUnit 5, Mockito ({@code @ExtendWith(MockitoExtension.class)}), AssertJ.
+ */
 @ExtendWith(MockitoExtension.class)
 class CustomUserDetailsServiceTest {
 

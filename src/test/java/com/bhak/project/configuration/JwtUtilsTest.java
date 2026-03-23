@@ -12,6 +12,35 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
+/**
+ * Unit tests for the JWT utility {@link JwtUtils}.
+ *
+ * <h2>Purpose</h2>
+ * Verifies the generation, extraction, and validation of JWT tokens
+ * (JSON Web Token) used for stateless authentication.
+ *
+ * <h2>Approach</h2>
+ * <ul>
+ *   <li>Pure unit test (no Spring context): the {@code secretKey}
+ *       and {@code expirationMs} properties are injected via
+ *       {@code ReflectionTestUtils}.</li>
+ *   <li>The test secret key is a 256-bit hex compatible with HMAC-SHA.</li>
+ * </ul>
+ *
+ * <h2>Tested scenarios</h2>
+ * <ul>
+ *   <li>Token generation from a username (3 JWT segments: header.payload.signature).</li>
+ *   <li>Subject extraction ({@code extractLogin}, {@code extractUsername}).</li>
+ *   <li>Validation with the correct {@code UserDetails} → {@code true}.</li>
+ *   <li>Validation with a different user → {@code false}.</li>
+ *   <li>Expired token (TTL=0) → throws {@code ExpiredJwtException}.</li>
+ *   <li>Generation from a Spring Security {@code UserDetails}.</li>
+ *   <li>Expiration date in the future.</li>
+ * </ul>
+ *
+ * <h2>Technologies</h2>
+ * JUnit 5, JJWT, Spring {@code ReflectionTestUtils}, AssertJ.
+ */
 class JwtUtilsTest {
 
     private JwtUtils jwtUtils;

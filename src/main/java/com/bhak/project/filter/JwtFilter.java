@@ -18,8 +18,35 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-// filtre jwt execute a chaque requete http
-// extrait le token du header, le valide et authentifie l'utilisateur
+/**
+ * HTTP filter executed once per request for stateless JWT authentication.
+ *
+ * <h2>Purpose</h2>
+ * Intercepts every incoming HTTP request, extracts the JWT token from the
+ * {@code Authorization: Bearer <token>} header, validates it, and if correct,
+ * places a {@link org.springframework.security.authentication.UsernamePasswordAuthenticationToken}
+ * in the {@link org.springframework.security.core.context.SecurityContextHolder}.
+ * This allows Spring Security and {@code @PreAuthorize} to recognise the
+ * authenticated user without relying on an HTTP session (stateless).
+ *
+ * <h2>How it works</h2>
+ * <ol>
+ *   <li>Reads the {@code Authorization} header. If absent or not prefixed with
+ *       {@code "Bearer "}, the request passes to the next filter without authentication.</li>
+ *   <li>Extracts the username via {@link com.bhak.project.configuration.JwtUtils#extractLogin(String)}.</li>
+ *   <li>Loads the corresponding {@link org.springframework.security.core.userdetails.UserDetails}
+ *       from {@link com.bhak.project.service.CustomUserDetailsService}.</li>
+ *   <li>Validates the token (signature + expiration) with {@code JwtUtils#isTokenValid()}.</li>
+ *   <li>On success, creates a {@code UsernamePasswordAuthenticationToken} with the account's
+ *       authorities and injects it into the {@code SecurityContext}.</li>
+ *   <li>On failure (expired or invalid token), a warning is logged and the request
+ *       continues without authentication (Spring Security will return a 401 or 403).</li>
+ * </ol>
+ *
+ * <h2>Technologies</h2>
+ * Extends {@link org.springframework.web.filter.OncePerRequestFilter} (ensures
+ * a single execution per request), Lombok, SLF4J.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j

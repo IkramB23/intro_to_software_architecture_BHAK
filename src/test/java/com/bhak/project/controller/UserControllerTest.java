@@ -26,6 +26,35 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Unit tests for the {@link UserController} controller (admin CRUD, web layer).
+ *
+ * <h2>Purpose</h2>
+ * Verifies that the admin endpoints ({@code /api/admin/users})
+ * return the correct HTTP status codes for CRUD operations: paginated list (200),
+ * get by ID (200/404), create (201), update (200), delete (204/404).
+ *
+ * <h2>Approach</h2>
+ * <ul>
+ *   <li>{@code @WebMvcTest(UserController.class)} – MVC context only.</li>
+ *   <li>{@code @AutoConfigureMockMvc(addFilters = false)} – security filters disabled.</li>
+ *   <li>{@code @WithMockUser(roles = "ADMIN")} – simulates a user with the ADMIN role
+ *       so that {@code @PreAuthorize} does not block the calls.</li>
+ *   <li>The {@code UserService} is mocked with {@code @MockBean}.</li>
+ * </ul>
+ *
+ * <h2>Tested scenarios</h2>
+ * <ul>
+ *   <li><b>List</b>: returns a page of accounts (200).</li>
+ *   <li><b>GetById</b>: found (200), not found (404).</li>
+ *   <li><b>Create</b>: success (201).</li>
+ *   <li><b>Update</b>: success (200).</li>
+ *   <li><b>Delete</b>: success (204), not found (404).</li>
+ * </ul>
+ *
+ * <h2>Technologies</h2>
+ * JUnit 5, Spring MockMvc, Mockito, Spring Security Test ({@code @WithMockUser}).
+ */
 @WebMvcTest(UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest {

@@ -19,9 +19,34 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-// configuration de la securite http
-// sessions stateless, routes publiques pour auth et swagger,
-// routes admin protegees par role
+/**
+ * Core HTTP security configuration (Spring Security 6).
+ *
+ * <h2>Purpose</h2>
+ * Defines the security filter chain (SecurityFilterChain) and the authentication
+ * beans used throughout the application.
+ *
+ * <h2>How it works</h2>
+ * <ul>
+ *   <li><b>CSRF disabled</b>: the API is consumed by REST clients (Postman, SPA front-end),
+ *       no HTML forms → CSRF protection is not needed.</li>
+ *   <li><b>Stateless sessions</b>: {@code SessionCreationPolicy.STATELESS}.
+ *       No HTTP session is created; authentication relies entirely on the JWT
+ *       sent in the {@code Authorization} header.</li>
+ *   <li><b>Public routes</b>: {@code /api/auth/**}, Swagger UI, root {@code /}.</li>
+ *   <li><b>Admin routes</b>: {@code /api/admin/**} requires the {@code ADMIN} role.</li>
+ *   <li><b>JWT filter</b>: the {@link com.bhak.project.filter.JwtFilter} is inserted
+ *       <em>before</em> the standard {@code UsernamePasswordAuthenticationFilter},
+ *       so the user is authenticated from the token before any role check.</li>
+ *   <li><b>DaoAuthenticationProvider</b>: uses {@link com.bhak.project.service.CustomUserDetailsService}
+ *       to load users and {@link org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder}
+ *       to compare passwords.</li>
+ * </ul>
+ *
+ * <h2>Annotations</h2>
+ * {@code @Configuration}, {@code @EnableWebSecurity}, {@code @EnableMethodSecurity}
+ * (enables {@code @PreAuthorize} in controllers), Lombok ({@code @RequiredArgsConstructor}).
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity

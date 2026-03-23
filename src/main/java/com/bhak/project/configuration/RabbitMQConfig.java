@@ -9,7 +9,38 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-// configuration rabbitmq : exchange, files, DLQ et convertisseur json
+/**
+ * RabbitMQ configuration on the main service side (auth-service).
+ *
+ * <h2>Purpose</h2>
+ * Declares the asynchronous messaging infrastructure used to publish
+ * business events ({@code UserRegistered}, {@code EmailVerified})
+ * to the notification-service and any future consumers.
+ *
+ * <h2>Declared topology</h2>
+ * <ul>
+ *   <li><b>Main exchange</b> ({@code auth.events}) – <em>topic</em> type, routes
+ *       messages based on the routing key.</li>
+ *   <li><b>Queue {@code notification.user-registered}</b> – receives registration
+ *       events (routing key {@code auth.user-registered}). Configured with a
+ *       Dead Letter Exchange (DLX) to redirect failed messages.</li>
+ *   <li><b>Queue {@code analytics.email-verified}</b> – receives email
+ *       verification events (routing key {@code auth.email-verified}).</li>
+ *   <li><b>DLX / DLQ</b> – {@code auth.events.dlx} and {@code notification.user-registered.dlq}
+ *       capture unprocessed messages (e.g. exception in the consumer) to
+ *       never lose a message (Dead Letter Queue pattern).</li>
+ * </ul>
+ *
+ * <h2>Serialisation</h2>
+ * The {@code Jackson2JsonMessageConverter} bean serialises Java objects to JSON
+ * before sending and deserialises them on reception, allowing different
+ * microservices to communicate without binary coupling.
+ *
+ * <h2>Annotations</h2>
+ * {@code @Configuration}, {@code @Value} (reads properties from
+ * {@code application.properties}), {@code @Bean}.
+ */
+
 @Configuration
 public class RabbitMQConfig {
 

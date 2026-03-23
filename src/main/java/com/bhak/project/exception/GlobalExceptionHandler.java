@@ -10,8 +10,28 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-// gestionnaire centralise des exceptions
-// intercepte les erreurs et retourne une reponse json avec le bon code http
+/**
+ * Centralised exception handler for the entire REST API.
+ *
+ * <h2>Purpose</h2>
+ * Intercepts exceptions thrown by controllers and services
+ * and converts them into standardised JSON responses with the appropriate HTTP status code.
+ * This avoids repeating error handling in every controller
+ * (DRY principle) and ensures a uniform response format.
+ *
+ * <h2>How it works</h2>
+ * <ul>
+ *   <li>{@code ResourceNotFoundException} → HTTP 404 (resource not found).</li>
+ *   <li>{@code DuplicateResourceException} → HTTP 409 (uniqueness conflict).</li>
+ *   <li>{@code InvalidRequestException} → HTTP 400 (invalid data).</li>
+ *   <li>Any other {@code Exception} → HTTP 500 (unexpected internal error).</li>
+ * </ul>
+ * Each response contains: {@code timestamp}, {@code status}, {@code error}, and {@code message}.
+ *
+ * <h2>Technologies</h2>
+ * {@code @RestControllerAdvice} (combines {@code @ControllerAdvice} + {@code @ResponseBody}),
+ * {@code @ExceptionHandler}, Lombok ({@code @Slf4j}).
+ */
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {

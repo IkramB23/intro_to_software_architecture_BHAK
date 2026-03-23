@@ -8,7 +8,30 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-// publie les evenements metier dans rabbitmq
+/**
+ * Service for publishing business events to RabbitMQ.
+ *
+ * <h2>Purpose</h2>
+ * Serves as the single exit point to the message broker. It publishes two
+ * types of events on the {@code auth.events} exchange (<em>topic</em> type):
+ * <ul>
+ *   <li>{@code UserRegistered} (routing key {@code auth.user-registered}) – emitted after
+ *       a registration to trigger a verification email.</li>
+ *   <li>{@code EmailVerified} (routing key {@code auth.email-verified}) – emitted after
+ *       verification link validation to feed analytics consumers.</li>
+ * </ul>
+ *
+ * <h2>How it works</h2>
+ * Uses the {@link org.springframework.amqp.rabbit.core.RabbitTemplate} configured
+ * with a {@code Jackson2JsonMessageConverter} to send objects as JSON.
+ * Each message is enriched with custom headers ({@code x-correlation-id},
+ * {@code x-schema-version}) via a {@code MessagePostProcessor}, facilitating
+ * distributed tracing and schema versioning.
+ *
+ * <h2>Technologies</h2>
+ * Spring AMQP ({@code RabbitTemplate}), {@code @Value} for injecting
+ * exchange and routing key names, Lombok ({@code @RequiredArgsConstructor}, {@code @Slf4j}).
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j

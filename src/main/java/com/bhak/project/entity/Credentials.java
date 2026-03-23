@@ -7,8 +7,31 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-// donnees d'authentification separees du user pour isoler les infos sensibles
-// le mot de passe est hache en BCrypt et jamais retourne en JSON
+/**
+ * JPA entity containing sensitive authentication data (table {@code tbl_credentials}).
+ *
+ * <h2>Purpose</h2>
+ * Separates identification information (email, phone, hashed password)
+ * from the {@link User} entity to respect the single responsibility principle
+ * and limit exposure of sensitive data. The password is hashed with BCrypt
+ * by {@link org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder} and is
+ * never returned in JSON responses thanks to {@code @JsonProperty(Access.WRITE_ONLY)}.
+ *
+ * <h2>Relationships</h2>
+ * {@code @OneToOne} to {@link User} (owning side, foreign key {@code account_id}).
+ * The inverse link is annotated with {@code @JsonIgnore} to avoid Jackson
+ * serialisation loops (User → Credentials → User → …).
+ *
+ * <h2>Security</h2>
+ * <ul>
+ *   <li>The password is never returned on read (write-only for registration).</li>
+ *   <li>Email and phone are unique in the database: {@code @Column(unique=true)}.</li>
+ * </ul>
+ *
+ * <h2>Annotations</h2>
+ * {@code @Entity}, {@code @Table}, {@code @JsonProperty}, {@code @JsonIgnore},
+ * Lombok ({@code @Data}, {@code @NoArgsConstructor}, {@code @AllArgsConstructor}).
+ */
 @Entity
 @Table(name = "tbl_credentials")
 @Data
